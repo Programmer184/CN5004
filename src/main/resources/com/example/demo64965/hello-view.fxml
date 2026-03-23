@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.demo64965.HelloController"
+            stylesheets="@style.css"
+            prefWidth="1000" prefHeight="700">
+
+    <!-- Left Sidebar -->
+    <left>
+        <VBox styleClass="sidebar" spacing="10" alignment="TOP_CENTER">
+            <Label text="Clinic Menu" styleClass="sidebar-title"/>
+            <Separator styleClass="sidebar-separator"/>
+            <Button text="Dashboard" onAction="#showDashboard" styleClass="sidebar-button"/>
+            <Button text="Doctors" onAction="#showDoctors" styleClass="sidebar-button"/>
+            <Button text="Patients" onAction="#showPatients" styleClass="sidebar-button"/>
+            <Button text="Appointments" onAction="#showAppointments" styleClass="sidebar-button"/>
+            <Button text="Schedule" onAction="#showSchedule" styleClass="sidebar-button"/>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Label text="© 2026" styleClass="sidebar-footer"/>
+        </VBox>
+    </left>
+
+    <!-- Main Content Area -->
+    <center>
+        <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" styleClass="main-tab-pane">
+            <!-- Dashboard Tab -->
+            <Tab text="Dashboard">
+                <VBox spacing="20" alignment="TOP_CENTER">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <HBox spacing="20" alignment="CENTER">
+                        <VBox styleClass="card" alignment="CENTER" spacing="5">
+                            <Label text="Doctors" styleClass="card-title"/>
+                            <Label fx:id="totalDoctorsLabel" styleClass="card-value"/>
+                        </VBox>
+                        <VBox styleClass="card" alignment="CENTER" spacing="5">
+                            <Label text="Patients" styleClass="card-title"/>
+                            <Label fx:id="totalPatientsLabel" styleClass="card-value"/>
+                        </VBox>
+                        <VBox styleClass="card" alignment="CENTER" spacing="5">
+                            <Label text="Today's Appointments" styleClass="card-title"/>
+                            <Label fx:id="todayAppointmentsLabel" styleClass="card-value"/>
+                        </VBox>
+                        <VBox styleClass="card" alignment="CENTER" spacing="5">
+                            <Label text="Upcoming (7 days)" styleClass="card-title"/>
+                            <Label fx:id="upcomingAppointmentsLabel" styleClass="card-value"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Today's Working Doctors -->
+                    <VBox spacing="10">
+                        <Label text="Doctors Working Today" styleClass="section-title"/>
+                        <ListView fx:id="todayDoctorsListView" prefHeight="100"/>
+                    </VBox>
+
+                    <!-- Upcoming Appointments -->
+                    <VBox spacing="10">
+                        <Label text="Upcoming Appointments" styleClass="section-title"/>
+                        <TableView fx:id="upcomingTable" prefHeight="300">
+                            <columns>
+                                <TableColumn text="Date" fx:id="upcomingDateCol"/>
+                                <TableColumn text="Time" fx:id="upcomingTimeCol"/>
+                                <TableColumn text="Doctor" fx:id="upcomingDoctorCol"/>
+                                <TableColumn text="Patient" fx:id="upcomingPatientCol"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </VBox>
+            </Tab>
+
+            <!-- Doctors Tab -->
+            <Tab text="Doctors">
+                <VBox spacing="10" alignment="TOP_CENTER">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <HBox spacing="10">
+                        <TextField fx:id="newDoctorField" promptText="Doctor Name"/>
+                        <Button text="Add Doctor" onAction="#addDoctor"/>
+                    </HBox>
+                    <ListView fx:id="doctorListView" prefHeight="400"/>
+                </VBox>
+            </Tab>
+
+            <!-- Patients Tab -->
+            <Tab text="Patients">
+                <VBox spacing="10" alignment="TOP_CENTER">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <HBox spacing="10">
+                        <TextField fx:id="newPatientField" promptText="Patient Name"/>
+                        <Button text="Add Patient" onAction="#addPatient"/>
+                    </HBox>
+                    <ListView fx:id="patientListView" prefHeight="400"/>
+                </VBox>
+            </Tab>
+
+            <!-- Appointments Tab -->
+            <Tab text="Appointments">
+                <VBox spacing="10" alignment="TOP_CENTER">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <HBox spacing="10" alignment="CENTER">
+                        <Label>Doctor:</Label>
+                        <ComboBox fx:id="doctorComboBox"/>
+                        <Label>Patient:</Label>
+                        <ComboBox fx:id="patientComboBox"/>
+                        <Label>Date:</Label>
+                        <DatePicker fx:id="datePicker"/>
+                        <Label>Time (HH:MM):</Label>
+                        <TextField fx:id="timeField"/>
+                        <Button text="Add Appointment" onAction="#addAppointment"/>
+                    </HBox>
+                    <HBox spacing="10" alignment="CENTER">
+                        <Label>Filter by Doctor:</Label>
+                        <ComboBox fx:id="filterDoctorComboBox"/>
+                        <Label>Filter by Patient:</Label>
+                        <ComboBox fx:id="filterPatientComboBox"/>
+                        <Label>Date:</Label>
+                        <DatePicker fx:id="filterDatePicker"/>
+                        <Button text="Clear Filters" onAction="#clearFilters"/>
+                    </HBox>
+                    <TableView fx:id="appointmentTable" prefHeight="300">
+                        <columns>
+                            <TableColumn text="Doctor" fx:id="appDoctorCol"/>
+                            <TableColumn text="Patient" fx:id="appPatientCol"/>
+                            <TableColumn text="Date" fx:id="appDateCol"/>
+                            <TableColumn text="Time" fx:id="appTimeCol"/>
+                            <TableColumn text="Actions" fx:id="appActionsCol"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </Tab>
+
+            <!-- Schedule Tab -->
+            <Tab text="Schedule">
+                <VBox spacing="15" alignment="TOP_CENTER">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                    <Label text="Doctor Working Days" styleClass="section-title"/>
+                    <HBox spacing="20" alignment="CENTER">
+                        <VBox spacing="5">
+                            <Label>Select Doctor:</Label>
+                            <ComboBox fx:id="scheduleDoctorComboBox" promptText="Choose doctor" prefWidth="200"/>
+                        </VBox>
+                        <VBox spacing="5">
+                            <Label>Working Days:</Label>
+                            <HBox spacing="10">
+                                <CheckBox fx:id="monCheckBox" text="Monday"/>
+                                <CheckBox fx:id="tueCheckBox" text="Tuesday"/>
+                                <CheckBox fx:id="wedCheckBox" text="Wednesday"/>
+                                <CheckBox fx:id="thuCheckBox" text="Thursday"/>
+                                <CheckBox fx:id="friCheckBox" text="Friday"/>
+                                <CheckBox fx:id="satCheckBox" text="Saturday"/>
+                                <CheckBox fx:id="sunCheckBox" text="Sunday"/>
+                            </HBox>
+                        </VBox>
+                    </HBox>
+                    <Button text="Update Schedule" onAction="#updateDoctorSchedule"/>
+                    <Label fx:id="scheduleMessageLabel" styleClass="message-label"/>
+                </VBox>
+            </Tab>
+        </TabPane>
+    </center>
+</BorderPane>
