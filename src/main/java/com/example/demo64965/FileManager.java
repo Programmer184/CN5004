@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class FileManager {
 
@@ -31,7 +30,6 @@ public class FileManager {
         List<Doctor> doctors = loadDoctors();
         doctors.remove(doctor);
         writeDoctors(doctors);
-        // remove all appointments of this doctor
         List<Appointment> appointments = loadAppointments();
         appointments.removeIf(a -> a.getDoctor().equals(doctor));
         writeAppointments(appointments);
@@ -40,7 +38,8 @@ public class FileManager {
     private static void writeDoctors(List<Doctor> doctors) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(DOCTORS_FILE))) {
             for (Doctor d : doctors) {
-                StringBuilder sb = new StringBuilder(d.getName());
+                StringBuilder sb = new StringBuilder();
+                sb.append(d.getName()).append(",").append(d.getSpecialty());
                 for (DayOfWeek day : d.getWorkingDays()) {
                     sb.append(',').append(day.toString().substring(0, 3));
                 }
@@ -61,10 +60,11 @@ public class FileManager {
                 if (line.trim().isEmpty()) continue;
                 String[] parts = line.split(",");
                 String name = parts[0].trim();
-                Doctor doctor = new Doctor(name);
-                if (parts.length > 1) {
+                String specialty = parts.length > 1 ? parts[1].trim() : "General Practitioner";
+                Doctor doctor = new Doctor(name, specialty);
+                if (parts.length > 2) {
                     Set<DayOfWeek> days = new HashSet<>();
-                    for (int i = 1; i < parts.length; i++) {
+                    for (int i = 2; i < parts.length; i++) {
                         String dayAbbr = parts[i].trim().toUpperCase();
                         try {
                             DayOfWeek day = DayOfWeek.valueOf(dayAbbr);
@@ -79,6 +79,25 @@ public class FileManager {
             e.printStackTrace();
         }
         return doctors;
+    }
+
+    public static void migrateOldDoctors() {
+        List<Doctor> doctors = loadDoctors();
+        boolean changed = false;
+        for (Doctor d : doctors) {
+            if (d.getWorkingDays().isEmpty()) {
+                Set<DayOfWeek> defaultDays = new HashSet<>(Arrays.asList(
+                        DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+                        DayOfWeek.THURSDAY, DayOfWeek.FRIDAY));
+                d.setWorkingDays(defaultDays);
+                changed = true;
+                System.out.println("Added default working days to " + d.getName());
+            }
+        }
+        if (changed) {
+            writeDoctors(doctors);
+            System.out.println("Migration complete: default working days added to all doctors.");
+        }
     }
 
     // ========== PATIENTS ==========
@@ -104,7 +123,7 @@ public class FileManager {
     private static void writePatients(List<Patient> patients) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(PATIENTS_FILE))) {
             for (Patient p : patients) {
-                writer.write(p.getName());
+                writer.write(p.getName() + "," + p.getAge() + "," + p.getMedicalCondition());
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -118,9 +137,12 @@ public class FileManager {
         try (BufferedReader reader = new BufferedReader(new FileReader(PATIENTS_FILE))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if (!line.trim().isEmpty()) {
-                    patients.add(new Patient(line.trim()));
-                }
+                if (line.trim().isEmpty()) continue;
+                String[] parts = line.split(",");
+                String name = parts[0].trim();
+                int age = parts.length > 1 ? Integer.parseInt(parts[1].trim()) : 0;
+                String condition = parts.length > 2 ? parts[2].trim() : "Not specified";
+                patients.add(new Patient(name, age, condition));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -141,6 +163,10 @@ public class FileManager {
     public static void deleteAppointment(Appointment appointment) {
         List<Appointment> appointments = loadAppointments();
         appointments.remove(appointment);
+        writeAppointments(appointments);
+    }
+
+    public static void saveAllAppointments(List<Appointment> appointments) {
         writeAppointments(appointments);
     }
 
